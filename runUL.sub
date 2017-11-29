@@ -8,25 +8,25 @@ executable = /usr/bin/mpirun
 
 output = /home/pbaker/nanograv/bwm/UL/DE421/bwm.out
 error = /home/pbaker/nanograv/bwm/UL/DE421/bwm.err
-arguments = "-np 1 python /home/pbaker/nanograv/bwm/UL/bwm_UL.py --ephem DE421"
+arguments = "-np 1 python /home/pbaker/nanograv/nano11_bwm/bwm_UL.py --ephem DE421"
 queue
 
 output = /home/pbaker/nanograv/bwm/UL/DE430/bwm.out
 error = /home/pbaker/nanograv/bwm/UL/DE430/bwm.err
-arguments = "-np 1 python /home/pbaker/nanograv/bwm/UL/bwm_UL.py --ephem DE430"
+arguments = "-np 1 python /home/pbaker/nanograv/nano11_bwm/bwm_UL.py --ephem DE430"
 queue
 
 output = /home/pbaker/nanograv/bwm/UL/DE435/bwm.out
 error = /home/pbaker/nanograv/bwm/UL/DE435/bwm.err
-arguments = "-np 1 python /home/pbaker/nanograv/bwm/UL/bwm_UL.py --ephem DE435"
+arguments = "-np 1 python /home/pbaker/nanograv/nano11_bwm/bwm_UL.py --ephem DE435"
 queue
 
 output = /home/pbaker/nanograv/bwm/UL/DE436/bwm.out
 error = /home/pbaker/nanograv/bwm/UL/DE436/bwm.err
-arguments = "-np 1 python /home/pbaker/nanograv/bwm/UL/bwm_UL.py --ephem DE436"
+arguments = "-np 1 python /home/pbaker/nanograv/nano11_bwm/bwm_UL.py --ephem DE436"
 queue
 
 output = /home/pbaker/nanograv/bwm/UL/BayesEphem/bwm.out
 error = /home/pbaker/nanograv/bwm/UL/BayesEphem/bwm.err
-arguments = "-np 1 python /home/pbaker/nanograv/bwm/UL/bwm_UL.py --ephem BayesEphem"
+arguments = "-np 1 python /home/pbaker/nanograv/nano11_bwm/bwm_UL.py --ephem BayesEphem"
 queue
