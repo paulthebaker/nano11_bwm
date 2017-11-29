@@ -31,6 +31,11 @@ args = parser.parse_args()
 datadir = '/home/pbaker/nanograv/data/'
 outdir = '/home/pbaker/nanograv/bwm/Det/{}/'.format(args.ephem)
 
+BayesEphem = False
+if args.ephem == 'BayesEphem':
+    BayesEphem = True
+    args.ephem = 'DE436'
+
 # read in data pickles
 filename = datadir + 'nano11_{}.pkl'.format(args.ephem)
 with open(filename, "rb") as f:
@@ -92,16 +97,14 @@ bwm = deterministic_signals.Deterministic(bwm_wf, name='bwm')
 tm = gp_signals.TimingModel()
 
 # physical ephemeris model
-if ephem=='BayesEphem':
-    eph = deterministic_signals.PhysicalEphemerisSignal(use_epoch_toas=True)
+eph = deterministic_signals.PhysicalEphemerisSignal(use_epoch_toas=True)
 
 ###########
 ##  PTA  ##
 ###########
-if ephem=='BayesEphem':
-    s = ef + eq + ec + rn + tm + eph + bwm
-else:
-    s = ef + eq + ec + rn + tm + bwm
+s = ef + eq + ec + rn + tm + bwm
+if BayesEphem:
+    s += eph
 
 pta = signal_base.PTA([s(p) for p in psrs])
 
@@ -129,7 +132,7 @@ sampler = ptmcmc(ndim, pta.get_lnlikelihood, pta.get_lnprior,
 jp = JumpProposal(pta)
 sampler.addProposalToCycle(jp.draw_from_prior, 15)
 sampler.addProposalToCycle(jp.draw_from_bwm_prior, 15)
-if ephem=='BayesEphem':
+if BayesEphem:
     sampler.addProposalToCycle(jp.draw_from_ephem_prior, 15)
 
 # SAMPLE!!
