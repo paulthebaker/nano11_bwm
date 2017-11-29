@@ -29,7 +29,7 @@ parser.add_argument('--ephem',
 args = parser.parse_args()
 
 datadir = '/home/pbaker/nanograv/data/'
-outdir = '/home/pbaker/nanograv/bwm/{}/'.format(args.ephem)
+outdir = '/home/pbaker/nanograv/bwm/Det/{}/'.format(args.ephem)
 
 # read in data pickles
 filename = datadir + 'nano11_{}.pkl'.format(args.ephem)

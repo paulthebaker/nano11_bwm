@@ -6,27 +6,27 @@ accounting_group = cgca.nanograv
 getenv=True
 executable = /usr/bin/mpirun
 
-output = /home/pbaker/nanograv/bwm/DE421/bwm.out
-error = /home/pbaker/nanograv/bwm/DE421/bwm.err
-arguments = "-np 1 python /home/pbaker/nanograv/bwm/bwm_det.py --ephem DE421"
+output = /home/pbaker/nanograv/bwm/Det/DE421/bwm.out
+error = /home/pbaker/nanograv/bwm/Det/DE421/bwm.err
+arguments = "-np 1 python /home/pbaker/nanograv/bwm/Det/bwm_det.py --ephem DE421"
 queue
 
-output = /home/pbaker/nanograv/bwm/DE430/bwm.out
-error = /home/pbaker/nanograv/bwm/DE430/bwm.err
-arguments = "-np 1 python /home/pbaker/nanograv/bwm/bwm_det.py --ephem DE430"
+output = /home/pbaker/nanograv/bwm/Det/DE430/bwm.out
+error = /home/pbaker/nanograv/bwm/Det/DE430/bwm.err
+arguments = "-np 1 python /home/pbaker/nanograv/bwm/Det/bwm_det.py --ephem DE430"
 queue
 
-output = /home/pbaker/nanograv/bwm/DE435/bwm.out
-error = /home/pbaker/nanograv/bwm/DE435/bwm.err
-arguments = "-np 1 python /home/pbaker/nanograv/bwm/bwm_det.py --ephem DE435"
+output = /home/pbaker/nanograv/bwm/Det/DE435/bwm.out
+error = /home/pbaker/nanograv/bwm/Det/DE435/bwm.err
+arguments = "-np 1 python /home/pbaker/nanograv/bwm/Det/bwm_det.py --ephem DE435"
 queue
 
-output = /home/pbaker/nanograv/bwm/DE436/bwm.out
-error = /home/pbaker/nanograv/bwm/DE436/bwm.err
-arguments = "-np 1 python /home/pbaker/nanograv/bwm/bwm_det.py --ephem DE436"
+output = /home/pbaker/nanograv/bwm/Det/DE436/bwm.out
+error = /home/pbaker/nanograv/bwm/Det/DE436/bwm.err
+arguments = "-np 1 python /home/pbaker/nanograv/bwm/Det/bwm_det.py --ephem DE436"
 queue
 
-output = /home/pbaker/nanograv/bwm/BayesEphem/bwm.out
-error = /home/pbaker/nanograv/bwm/BayesEphem/bwm.err
-arguments = "-np 1 python /home/pbaker/nanograv/bwm/bwm_det.py --ephem BayesEphem"
+output = /home/pbaker/nanograv/bwm/Det/BayesEphem/bwm.out
+error = /home/pbaker/nanograv/bwm/Det/BayesEphem/bwm.err
+arguments = "-np 1 python /home/pbaker/nanograv/bwm/Det/bwm_det.py --ephem BayesEphem"
 queue
