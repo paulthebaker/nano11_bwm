@@ -97,8 +97,7 @@ bwm = deterministic_signals.Deterministic(bwm_wf, name='bwm')
 tm = gp_signals.TimingModel()
 
 # physical ephemeris model
-if BayesEphem:
-    eph = deterministic_signals.PhysicalEphemerisSignal(use_epoch_toas=True)
+eph = deterministic_signals.PhysicalEphemerisSignal(use_epoch_toas=True)
 
 ###########
 ##  PTA  ##
