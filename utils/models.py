@@ -272,7 +272,7 @@ def model_gwb(psrs, psd='powerlaw', gamma_common=None, orf=None,
 
     # common red noise block
     s += common_red_noise_block(psd=psd, prior=amp_prior, Tspan=Tspan,
-                                gamma_val=gamma_common, name='gwb'
+                                gamma_val=gamma_common, name='gwb',
                                 orf=orf)
 
     # ephemeris model
@@ -416,7 +416,7 @@ def model_gwb_bwm(psrs, psd='powerlaw', gamma_common=None, orf=None,
     
     # common red noise block
     s += common_red_noise_block(psd=psd, prior=amp_prior, Tspan=Tspan,
-                                gamma_val=gamma_common, name='gwb'
+                                gamma_val=gamma_common, name='gwb',
                                 orf=orf)
 
     # ephemeris model
