@@ -14,6 +14,29 @@ from enterprise import constants as const
 
 #### Model component building blocks ####
 
+def which_psrs(psrs, slice_yr=100, min_yr=3):
+    """determine pulsars to use for a time slice
+    :param psrs:
+        list of ``enterprise.Pulsar`` objects
+    :param slice_yr:
+        length of time slice in years.  If slice is longer than
+        dataset then all time is used
+    :param min_yr:
+        minimum data length to include a pulsar in a slice (years)
+    """
+    t0 = np.min([p.toas.min() for p in psrs])  # first observation
+    tx = t0 + slice_yr*const.yr  # end time of slice
+
+    which = []
+    for p in psrs:
+        ms = (p.toas.min()-t0)/const.yr + min_yr
+        if slice_yr > ms:
+            p.filter_data(start_time=t0/const.day, end_time=tx/const.day)
+            which.append(p)
+
+    return which
+
+
 def white_noise_block(vary=False):
     """
     Returns the white noise block of the model:
