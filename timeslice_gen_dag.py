@@ -8,7 +8,7 @@ slices = np.arange(5, 12, 0.5)
 
 EPHs = ['DE421', 'DE436']
 
-subfile = 'bwm_slice.sub'
+subfile = 'condor_sub/bwm_slice.sub'
 
 dag_dir = '/home/pbaker/nanograv/bwm/slices/'
 if not os.path.exists(dag_dir):

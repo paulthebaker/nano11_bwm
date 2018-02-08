@@ -19,7 +19,7 @@ PSRs = Dustys_PSRs + extra_PSRs
 
 EPHs = ['DE421', 'DE436']
 
-subfile = 'bwm_sngl.sub'
+subfile = 'condor_sub/bwm_sngl.sub'
 
 dag_dir = '/home/pbaker/nanograv/bwm/sngl/'
 if not os.path.exists(dag_dir):
