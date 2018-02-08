@@ -8,10 +8,10 @@ class JumpProposal(object):
     def __init__(self, pta):
         """Set up some custom jump proposals
         
-        :param params: A list of `enterprise` parameters
-        
+        :param pta: an `enterprise` PTA instance
         """
         self.params = pta.params
+        self.pnames = pta.param_names
         self.npar = len(pta.params)
         self.ndim = sum(p.size or 1 for p in pta.params)
         
@@ -125,7 +125,62 @@ class JumpProposal(object):
         # forward-backward jump probability
         lqxy = param.get_logpdf(x[self.pmap[param]]) - param.get_logpdf(q[self.pmap[param]])
                 
-        return q, float(lqxy) 
+        return q, float(lqxy)
+
+
+    def build_log_uni_draw(self, plist, logmin, logmax):
+        """create a callable object to perfom a log-uniform draw
+
+        :param plist:
+            single string or list of strings of parameter name(s) to
+            use for this jump.
+        :param logmin:
+            log of min of uniform distr (log10)
+        :param logmax:
+            log of max of uniform distr (log10)
+        """
+        if not isinstance(plist, list):
+            plist = [plist]
+        idxs = []
+        for pn in plist:
+            idxs.append(self.pnames.index(pn))
+        
+        lud = LogUniDraw(idxs, logmin, logmax)
+        #namestr = 'logunidraw'
+        #for ii in idxs:
+        #    namestr += '_{}'.format(ii)
+        #lud.__name__ = namestr
+
+        return lud
+
+
+class LogUniDraw(object):
+    """object for custom log-uniform draws
+    """
+    def __init__(self, idxs, logmin, logmax):
+        """
+        :param idx: index of parameter to use for jump
+        """
+        self.idxs = idxs
+        self.logmin = logmin
+        self.logmax = logmax
+        
+        namestr = 'logunidraw'
+        for ii in idxs:
+            namestr += '_{}'.format(ii)
+        self.__name__ = namestr
+
+    def __call__(self, x, iter, beta):
+        """proposal from log-uniform distribution
+        """
+        q = x.copy()
+        lqxy = 0
+
+        # draw parameter from signal model
+        for ii in self.idxs:
+            q[ii] = np.random.uniform(self.logmin, self.logmax)
+
+        return q, 0
 
 
 # utility function for finding global parameters
