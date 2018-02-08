@@ -10,6 +10,7 @@ from enterprise.signals import gp_signals
 from enterprise.signals import deterministic_signals
 from enterprise.signals import utils
 
+from enterprise import constants as const
 
 #### Model component building blocks ####
 
@@ -149,7 +150,8 @@ def common_red_noise_block(psd='powerlaw', prior='log-uniform',
 
 
 def bwm_block(Tmin, Tmax, amp_prior='log-uniform',
-              sky_prior=None, name='bwm'):
+              skyloc=None, logmin=-18, logmax=-11,
+              name='bwm'):
     """
     Returns deterministic GW burst with memory model:
         1. Burst event parameterized by time, sky location,
@@ -161,15 +163,23 @@ def bwm_block(Tmin, Tmax, amp_prior='log-uniform',
     :param amp_prior:
         Prior on log10_A. Default if "log-uniform". Use "uniform" for
         upper limits.
-    :param name: Name of BWM signal.
+    :param skyloc:
+        Fixed sky location of BWM signal search as [cos(theta), phi].
+        Search over sky location if ``None`` given.
+    :param logmin:
+        log of minimum BWM amplitude for prior (log10)
+    :param logmax:
+        log of maximum BWM amplitude for prior (log10)
+    :param name:
+        Name of BWM signal.
     """
 
     # BWM parameters
     amp_name = 'log10_A_{}'.format(name)
-    if prior == 'uniform':
-        log10_A_bwm = parameter.LinearExp(-18, -11)(amp_name)
-    elif prior == 'log-uniform':
-        log10_A_bwm = parameter.Uniform(-18, -11)(amp_name)
+    if amp_prior == 'uniform':
+        log10_A_bwm = parameter.LinearExp(logmin, logmax)(amp_name)
+    elif amp_prior == 'log-uniform':
+        log10_A_bwm = parameter.Uniform(logmin, logmax)(amp_name)
 
     pol_name = 'pol_{}'.format(name)
     pol = parameter.Uniform(0, np.pi)(pol_name)
@@ -179,8 +189,12 @@ def bwm_block(Tmin, Tmax, amp_prior='log-uniform',
 
     costh_name = 'costheta_{}'.format(name)
     phi_name = 'phi_{}'.format(name)
-    costh = parameter.Uniform(-1, 1)(costh_name)
-    phi = parameter.Uniform(0, 2*np.pi)(phi_name)
+    if skyloc is None:
+        costh = parameter.Uniform(-1, 1)(costh_name)
+        phi = parameter.Uniform(0, 2*np.pi)(phi_name)
+    else:
+        costh = parameter.Constant(skyloc[0])(costh_name)
+        phi = parameter.Constant(skyloc[1])(phi_name)
 
 
     # BWM signal
@@ -258,9 +272,9 @@ def model_gwb(psrs, psd='powerlaw', gamma_common=None, orf=None,
     amp_prior = 'uniform' if upper_limit else 'log-uniform'
 
     # find the maximum time span to set GW frequency sampling
-    tmin = [p.toas.min() for p in psrs]
-    tmax = [p.toas.max() for p in psrs]
-    Tspan = np.max(tmax) - np.min(tmin)
+    tmin = np.min([p.toas.min() for p in psrs])
+    tmax = np.max([p.toas.max() for p in psrs])
+    Tspan = tmax - tmin
 
     # white noise
     s = white_noise_block(vary=False)
@@ -286,8 +300,9 @@ def model_gwb(psrs, psd='powerlaw', gamma_common=None, orf=None,
     return pta
 
 
-def model_bwm(psrs, Tmin_bwm=None, Tmax_bwm=None,
-             upper_limit=False, bayesephem=False):
+def model_bwm(psrs, upper_limit=False, bayesephem=False,
+              Tmin_bwm=None, Tmax_bwm=None,
+              skyloc=None, logmin=-18, logmax=-11):
     """
     Reads in list of enterprise Pulsar instance and returns a PTA
     instantiated with BWM model:
@@ -300,10 +315,6 @@ def model_bwm(psrs, Tmin_bwm=None, Tmax_bwm=None,
     global:
         1. Deterministic GW burst with memory signal.
         2. Optional physical ephemeris modeling.
-    :param Tmin_bwm:
-        Min time to search for BWM (MJD). If omitted, uses first TOA.
-    :param Tmax_bwm:
-        Max time to search for BWM (MJD). If omitted, uses last TOA.
     :param upper_limit:
         Perform upper limit on common red noise amplitude. By default
         this is set to False. Note that when perfoming upper limits it
@@ -311,19 +322,30 @@ def model_bwm(psrs, Tmin_bwm=None, Tmax_bwm=None,
         value.
     :param bayesephem:
         Include BayesEphem model. Set to False by default
+    :param Tmin_bwm:
+        Min time to search for BWM (MJD). If omitted, uses first TOA.
+    :param Tmax_bwm:
+        Max time to search for BWM (MJD). If omitted, uses last TOA.
+    :param skyloc:
+        Fixed sky location of BWM signal search as [cos(theta), phi].
+        Search over sky location if ``None`` given.
+    :param logmin:
+        log of minimum BWM amplitude for prior (log10)
+    :param logmax:
+        log of maximum BWM amplitude for prior (log10)
     """
 
     amp_prior = 'uniform' if upper_limit else 'log-uniform'
 
     # find the maximum time span to set GW frequency sampling
-    tmin = [p.toas.min() for p in psrs]
-    tmax = [p.toas.max() for p in psrs]
-    Tspan = np.max(tmax) - np.min(tmin)
+    tmin = np.min([p.toas.min() for p in psrs])
+    tmax = np.max([p.toas.max() for p in psrs])
+    Tspan = tmax - tmin
 
     if Tmin_bwm == None:
-        Tmin_bwm = tmin//86400
+        Tmin_bwm = tmin/const.day
     if Tmax_bwm == None:
-        Tmax_bwm = tmax//86400
+        Tmax_bwm = tmax/const.day
 
     # white noise
     s = white_noise_block(vary=False)
@@ -333,6 +355,7 @@ def model_bwm(psrs, Tmin_bwm=None, Tmax_bwm=None,
 
     # GW BWM signal block
     s += bwm_block(Tmin_bwm, Tmax_bwm, amp_prior=amp_prior,
+                   skyloc=skyloc, logmin=logmin, logmax=logmax,
                    name='bwm')
 
     # ephemeris model
@@ -393,14 +416,14 @@ def model_gwb_bwm(psrs, psd='powerlaw', gamma_common=None, orf=None,
     amp_prior = 'uniform' if upper_limit else 'log-uniform'
 
     # find the maximum time span to set GW frequency sampling
-    tmin = [p.toas.min() for p in psrs]
-    tmax = [p.toas.max() for p in psrs]
-    Tspan = np.max(tmax) - np.min(tmin)
+    tmin = np.min([p.toas.min() for p in psrs])
+    tmax = np.max([p.toas.max() for p in psrs])
+    Tspan = tmax - tmin
 
     if Tmin_bwm == None:
-        Tmin_bwm = tmin//86400
+        Tmin_bwm = tmin/const.day
     if Tmax_bwm == None:
-        Tmax_bwm = tmax//86400
+        Tmax_bwm = tmax/const.day
 
     # white noise
     s = white_noise_block(vary=False)
