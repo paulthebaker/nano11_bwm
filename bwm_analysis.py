@@ -35,6 +35,16 @@ parser.add_argument('-o', '--outdir',
                     action='store',
                     help="location to write output")
 
+parser.add_argument('--costheta', type=float,
+                    dest='costh', default=None,
+                    action='store',
+                    help="sky position: cos(theta)")
+
+parser.add_argument('--phi', type=float,
+                    dest='phi', default=None,
+                    action='store',
+                    help="sky position: phi")
+
 parser.add_argument('-u', '--upper-limit',
                     dest='UL', default=False,
                     action='store_true',
@@ -53,6 +63,21 @@ parser.add_argument('-N', '--Nsamp', type=int,
                     help="number of samples to collect (before thinning)")
 
 args = parser.parse_args()
+
+if args.costh and args.phi:
+    if args.costh > 1 or args.costh < -1:
+        raise ValueError("costheta must be in range [-1, 1]")
+    if args.phi > 2*np.pi or args.phi < 0:
+        raise ValueError("phi must be in range [0, 2*pi]")
+
+    skyloc = [args.costh, args.phi]
+
+elif not args.costh and not args.phi:
+    skyloc = None
+
+else:
+    err = "for fixed sky location must provide BOTH phi and costheta"
+    raise RuntimeError(err)
 
 try:
     subprocess.run(['mkdir', '-p', args.outdir])
@@ -85,7 +110,8 @@ t0max = tmax - tclip
 pta = models.model_bwm(psrs,
                        upper_limit=args.UL, bayesephem=args.BE,
                        logmin=logminA, logmax=logmaxA,
-                       Tmin_bwm=t0min, Tmax_bwm=t0max) 
+                       Tmin_bwm=t0min, Tmax_bwm=t0max,
+                       skyloc=skyloc)
 pta.set_default_params(setpars)
 
 

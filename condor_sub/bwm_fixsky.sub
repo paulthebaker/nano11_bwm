@@ -1,0 +1,19 @@
+universe = vanilla
+request_cpus = 4
+request_memory = 4096
+environment= "MKL_NUM_THREADS=4"
+accounting_group = cgca.nanograv
+getenv=True
+executable = /usr/bin/mpirun
+
+output = /home/pbaker/nanograv/bwm/fixsky/$(ephem)/$(loc)/bwm.out
+error = /home/pbaker/nanograv/bwm/fixsky/$(ephem)/$(loc)/bwm.err
+arguments = "-np 1 python /home/pbaker/nanograv/nano11_bwm/bwm_analysis.py \
+  --ephem $(ephem) \
+  --costheta $(costh) \
+  --phi $(phi) \
+  --outdir /home/pbaker/nanograv/bwm/fixsky/$(ephem)/$(loc) \
+  --datadir /home/pbaker/nanograv/data/ \
+  -N 1500000"
+
+queue
