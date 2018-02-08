@@ -10,8 +10,6 @@ from enterprise.signals import gp_signals
 from enterprise.signals import deterministic_signals
 from enterprise.signals import utils
 
-from utils import get_noise_dict
-
 
 #### Model component building blocks ####
 
@@ -154,7 +152,7 @@ def bwm_block(Tmin, Tmax, amp_prior='log-uniform',
               sky_prior=None, name='bwm'):
     """
     Returns deterministic GW burst with memory model:
-        1. Burst event parameterized by time, sky location, 
+        1. Burst event parameterized by time, sky location,
         polarization angle, and amplitude
     :param Tmin:
         Min time to search, probably first TOA (MJD).
@@ -314,7 +312,7 @@ def model_bwm(psrs, Tmin_bwm=None, Tmax_bwm=None,
     :param bayesephem:
         Include BayesEphem model. Set to False by default
     """
-    
+
     amp_prior = 'uniform' if upper_limit else 'log-uniform'
 
     # find the maximum time span to set GW frequency sampling
@@ -403,7 +401,7 @@ def model_gwb_bwm(psrs, psd='powerlaw', gamma_common=None, orf=None,
         Tmin_bwm = tmin//86400
     if Tmax_bwm == None:
         Tmax_bwm = tmax//86400
-    
+
     # white noise
     s = white_noise_block(vary=False)
 
@@ -413,7 +411,7 @@ def model_gwb_bwm(psrs, psd='powerlaw', gamma_common=None, orf=None,
     # GW BWM signal block
     s += bwm_block(Tmin_bwm, Tmax_bwm, amp_prior=amp_prior,
                    name='bwm')
-    
+
     # common red noise block
     s += common_red_noise_block(psd=psd, prior=amp_prior, Tspan=Tspan,
                                 gamma_val=gamma_common, name='gwb',
