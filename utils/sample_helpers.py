@@ -189,7 +189,7 @@ def get_global_parameters(pta):
     for sc in pta._signalcollections:
         pars.extend(sc.param_names)
     
-    gpars = np.unique(filter(lambda x: pars.count(x)>1, pars))
+    gpars = np.unique(list(filter(lambda x: pars.count(x)>1, pars)))
     ipars = np.array([p for p in pars if p not in gpars])
         
     return gpars, ipars
