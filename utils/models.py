@@ -13,6 +13,16 @@ from enterprise.signals import utils
 from enterprise import constants as const
 
 #### Model component building blocks ####
+@signal_base.function
+def free_spectrum(f, log10_rho=None):
+    """
+    Free spectral model. PSD  amplitude at each frequency
+    is a free parameter. Model is parameterized by
+    S(f_i) = \rho_i^2 * T,
+    where \rho_i is the free parameter and T is the observation
+    length.
+    """
+    return np.repeat(10**(2*log10_rho), 2)
 
 def which_psrs(psrs, slice_yr=100, min_yr=3):
     """determine pulsars to use for a time slice
