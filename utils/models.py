@@ -90,6 +90,28 @@ def white_noise_block(vary=False):
     return s
 
 
+def free_noise_block(prior='log-uniform', Tspan=None):
+    """Returns free spectrum noise model:
+        1. noise PSD with 30 sampling frequencies
+    :param prior:
+        Prior on log10_A. Default if "log-uniform". Use "uniform" for
+        upper limits.
+    :param Tspan:
+        Sets frequency sampling f_i = i / Tspan. Default will
+        use overall time span for indivicual pulsar.
+    """
+
+    if prior == 'uniform':
+        log10_rho = parameter.LinearExp(-9, -4, size=30)
+    elif prior == 'log-uniform':
+        log10_rho = parameter.Uniform(-9, -4, size=30)
+
+    spect = free_spectrum(log10_rho=log10_rho)
+    fn = gp_signals.FourierBasisGP(spect, components=30, Tspan=Tspan)
+
+    return fn
+
+
 def red_noise_block(prior='log-uniform', Tspan=None):
     """
     Returns red noise model:
