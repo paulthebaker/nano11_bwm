@@ -173,7 +173,7 @@ def common_red_noise_block(psd='powerlaw', prior='log-uniform',
 
     # common red noise parameters
     if psd in ['powerlaw', 'turnover']:
-        amp_name = 'log10_A_{}'.format(name)
+        amp_name = '{}_log10_A'.format(name)
         if prior == 'uniform':
             log10_Agw = parameter.LinearExp(-18, -11)(amp_name)
         elif prior == 'log-uniform' and gamma_val is not None:
@@ -184,7 +184,7 @@ def common_red_noise_block(psd='powerlaw', prior='log-uniform',
         else:
             log10_Agw = parameter.Uniform(-18, -11)(amp_name)
 
-        gam_name = 'gamma_{}'.format(name)
+        gam_name = '{}_gamma'.format(name)
         if gamma_val is not None:
             gamma_gw = parameter.Constant(gamma_val)(gam_name)
         else:
@@ -194,8 +194,8 @@ def common_red_noise_block(psd='powerlaw', prior='log-uniform',
         if psd == 'powerlaw':
             cpl = utils.powerlaw(log10_A=log10_Agw, gamma=gamma_gw)
         elif psd == 'turnover':
-            kappa_name = 'kappa_{}'.format(name)
-            lf0_name = 'log10_fbend_{}'.format(name)
+            kappa_name = '{}_kappa'.format(name)
+            lf0_name = '{}_log10_fbend'.format(name)
             kappa_gw = parameter.Uniform(0, 7)(kappa_name)
             lf0_gw = parameter.Uniform(-9, -7)(lf0_name)
             cpl = utils.turnover(log10_A=log10_Agw, gamma=gamma_gw,
@@ -237,20 +237,20 @@ def bwm_block(Tmin, Tmax, amp_prior='log-uniform',
     """
 
     # BWM parameters
-    amp_name = 'log10_A_{}'.format(name)
+    amp_name = '{}_log10_A'.format(name)
     if amp_prior == 'uniform':
         log10_A_bwm = parameter.LinearExp(logmin, logmax)(amp_name)
     elif amp_prior == 'log-uniform':
         log10_A_bwm = parameter.Uniform(logmin, logmax)(amp_name)
 
-    pol_name = 'pol_{}'.format(name)
+    pol_name = '{}_pol'.format(name)
     pol = parameter.Uniform(0, np.pi)(pol_name)
 
-    t0_name = 't0_{}'.format(name)
+    t0_name = '{}_t0'.format(name)
     t0 = parameter.Uniform(Tmin, Tmax)(t0_name)
 
-    costh_name = 'costheta_{}'.format(name)
-    phi_name = 'phi_{}'.format(name)
+    costh_name = '{}_costheta'.format(name)
+    phi_name = '{}_phi'.format(name)
     if skyloc is None:
         costh = parameter.Uniform(-1, 1)(costh_name)
         phi = parameter.Uniform(0, 2*np.pi)(phi_name)
