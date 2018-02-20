@@ -24,7 +24,8 @@ def free_spectrum(f, log10_rho=None):
     """
     return np.repeat(10**(2*log10_rho), 2)
 
-def which_psrs(psrs, slice_yr=100, min_yr=3):
+
+def which_psrs(psrs, slice_yr=100, min_yr=3, backward=False):
     """determine pulsars to use for a time slice
     :param psrs:
         list of ``enterprise.Pulsar`` objects
@@ -33,14 +34,20 @@ def which_psrs(psrs, slice_yr=100, min_yr=3):
         dataset then all time is used
     :param min_yr:
         minimum data length to include a pulsar in a slice (years)
+    :param backward:
+        True for backward slices
     """
-    t0 = np.min([p.toas.min() for p in psrs])  # first observation
-    tx = t0 + slice_yr*const.yr  # end time of slice
+    if backward:
+        tx = np.max([p.toas.max() for p in psrs])  # last observation
+        t0 = tx - slice_yr*const.yr  # start time of slice
+    else:
+        t0 = np.min([p.toas.min() for p in psrs])  # first observation
+        tx = t0 + slice_yr*const.yr  # end time of slice
 
     which = []
     for p in psrs:
         ms = (p.toas.min()-t0)/const.yr + min_yr
-        if slice_yr > ms:
+        if slice_yr > ms or backward:
             p.filter_data(start_time=t0/const.day, end_time=tx/const.day)
             which.append(p)
 
