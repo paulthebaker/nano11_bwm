@@ -362,9 +362,10 @@ def model_gwb(psrs, psd='powerlaw', gamma_common=None, orf=None,
     return pta
 
 
-def model_bwm(psrs, upper_limit=False, bayesephem=False,
+def model_bwm(psrs,
               Tmin_bwm=None, Tmax_bwm=None,
-              skyloc=None, logmin=-18, logmax=-11):
+              skyloc=None, logmin=-18, logmax=-11,
+              upper_limit=False, bayesephem=False, free_rn=False):
     """
     Reads in list of enterprise Pulsar instance and returns a PTA
     instantiated with BWM model:
@@ -377,13 +378,6 @@ def model_bwm(psrs, upper_limit=False, bayesephem=False,
     global:
         1. Deterministic GW burst with memory signal.
         2. Optional physical ephemeris modeling.
-    :param upper_limit:
-        Perform upper limit on common red noise amplitude. By default
-        this is set to False. Note that when perfoming upper limits it
-        is recommended that the spectral index also be fixed to a specific
-        value.
-    :param bayesephem:
-        Include BayesEphem model. Set to False by default
     :param Tmin_bwm:
         Min time to search for BWM (MJD). If omitted, uses first TOA.
     :param Tmax_bwm:
@@ -395,6 +389,15 @@ def model_bwm(psrs, upper_limit=False, bayesephem=False,
         log of minimum BWM amplitude for prior (log10)
     :param logmax:
         log of maximum BWM amplitude for prior (log10)
+    :param upper_limit:
+        Perform upper limit on common red noise amplitude. By default
+        this is set to False. Note that when perfoming upper limits it
+        is recommended that the spectral index also be fixed to a specific
+        value.
+    :param bayesephem:
+        Include BayesEphem model. Set to False by default
+    :param free_rn:
+        Use free red noise spectrum model. Set to False by default
     """
 
     amp_prior = 'uniform' if upper_limit else 'log-uniform'
@@ -413,7 +416,10 @@ def model_bwm(psrs, upper_limit=False, bayesephem=False,
     s = white_noise_block(vary=False)
 
     # red noise
-    s += red_noise_block(prior=amp_prior, Tspan=Tspan)
+    if free_rn:
+        s += free_noise_block(prior=amp_prior, Tspan=Tspan)
+    else:
+        s += red_noise_block(prior=amp_prior, Tspan=Tspan)
 
     # GW BWM signal block
     s += bwm_block(Tmin_bwm, Tmax_bwm, amp_prior=amp_prior,
@@ -433,8 +439,10 @@ def model_bwm(psrs, upper_limit=False, bayesephem=False,
     return pta
 
 
-def model_gwb_bwm(psrs, psd='powerlaw', gamma_common=None, orf=None,
+def model_gwb_bwm(psrs,
+              psd='powerlaw', gamma_common=None, orf=None,
               Tmin_bwm=None, Tmax_bwm=None,
+              skyloc=None, logmin=-18, logmax=-11,
               upper_limit=False, bayesephem=False):
     """
     Reads in list of enterprise Pulsar instance and returns a PTA
@@ -466,6 +474,13 @@ def model_gwb_bwm(psrs, psd='powerlaw', gamma_common=None, orf=None,
         Min time to search for BWM (MJD). If omitted, uses first TOA.
     :param Tmax_bwm:
         Max time to search for BWM (MJD). If omitted, uses last TOA.
+    :param skyloc:
+        Fixed sky location of BWM signal search as [cos(theta), phi].
+        Search over sky location if ``None`` given.
+    :param logmin:
+        log of minimum BWM amplitude for prior (log10)
+    :param logmax:
+        log of maximum BWM amplitude for prior (log10)
     :param upper_limit:
         Perform upper limit on common red noise amplitude. By default
         this is set to False. Note that when perfoming upper limits it
@@ -495,6 +510,7 @@ def model_gwb_bwm(psrs, psd='powerlaw', gamma_common=None, orf=None,
 
     # GW BWM signal block
     s += bwm_block(Tmin_bwm, Tmax_bwm, amp_prior=amp_prior,
+                   skyloc=skyloc, logmin=logmin, logmax=logmax,
                    name='bwm')
 
     # common red noise block
@@ -506,8 +522,8 @@ def model_gwb_bwm(psrs, psd='powerlaw', gamma_common=None, orf=None,
     if bayesephem:
         s += deterministic_signals.PhysicalEphemerisSignal(use_epoch_toas=True)
 
-    # timing model
-    s += gp_signals.TimingModel()
+    # SVD timing model
+    s += gp_signals.TimingModel(use_svd=True)
 
     # set up PTA
     pta = signal_base.PTA([s(psr) for psr in psrs])
