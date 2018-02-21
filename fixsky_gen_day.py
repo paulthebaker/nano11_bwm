@@ -31,7 +31,7 @@ with open(dag_dir + dag_name, 'w') as f:
             theta, phi = hp.pix2ang(nside,ii)
             costh = np.cos(theta)
 
-            outdir = dag_dir + "{0:s}/{1:d}/".format(ephem, loc)
+            outdir = dag_dir + "{0:s}/{1:03d}/".format(ephem, loc)
             if not os.path.exists(outdir):
                 os.makedirs(outdir)
             job_ID = random.getrandbits(128)
