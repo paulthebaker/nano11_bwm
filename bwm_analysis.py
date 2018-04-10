@@ -72,6 +72,11 @@ parser.add_argument('-N', '--Nsamp', type=int,
                     action='store',
                     help="number of samples to collect (before thinning)")
 
+parser.add_argument('--write-hot',
+                    dest='write_hot', default=False,
+                    action='store_true',
+                    help="write hot PT chains")
+
 args = parser.parse_args()
 
 
@@ -186,4 +191,6 @@ if args.UL:
 
 
 # SAMPLE!!
-sampler.sample(x0, args.N, SCAMweight=35, AMweight=10, DEweight=50)
+sampler.sample(x0, args.N,
+               SCAMweight=30, AMweight=15, DEweight=50,
+               writeHotChains=args.write_hot)
