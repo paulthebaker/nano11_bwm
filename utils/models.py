@@ -431,7 +431,7 @@ def model_bwm(psrs,
         s += deterministic_signals.PhysicalEphemerisSignal(use_epoch_toas=True)
 
     # timing model
-    s += gp_signals.TimingModel()
+    s += gp_signals.TimingModel(use_svd=True)
 
     # set up PTA
     pta = signal_base.PTA([s(psr) for psr in psrs])
