@@ -11,7 +11,7 @@ except:
     import cPickle as pickle
 
 from utils import models
-from utils.sample_helpers import JumpProposal, get_parameter_groups
+from utils.sample_helpers import JumpProposal, get_parameter_groups, count_lines
 
 from PTMCMCSampler.PTMCMCSampler import PTSampler as ptmcmc
 
@@ -95,6 +95,12 @@ try:
 except:
     # Python 2.7 ... harumph!
     subprocess.call('mkdir -p ' + args.outdir, shell=True)
+
+chainfile = outdir + '/chain_1.txt'
+thin = 10  # default PTMCMC thinning
+if os.path.isfile(chainfile)
+    Ndone = count_lines(chainfile)
+    args.N = int((args.N - thin*Ndone) + Ndone)
 
 # read in data pickles
 filename = args.datadir + 'nano11_{}.pkl'.format(args.ephem)

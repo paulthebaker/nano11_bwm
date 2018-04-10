@@ -1,7 +1,18 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 import numpy as np
+import os
 
+def count_lines(fname):
+    """count lines in a file
+
+    :param fname: filename including path
+    """
+    if not os.path.exists(fname):
+        return 0
+    with open(chain_path) as f:
+        rows = sum(1 for _ in f)
+    return int(rows)
 
 class JumpProposal(object):
     
