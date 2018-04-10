@@ -9,12 +9,13 @@ npix = hp.nside2npix(nside)
 
 EPHs = ['DE421', 'DE436']
 
-subfile = 'condor_sub/bwm_fixsky.sub'
+subdr = 'condor_sub/'
+subfile = 'bwm_fixsky.sub'
 
 dag_dir = '/home/pbaker/nanograv/bwm/fixsky/'
 if not os.path.exists(dag_dir):
     os.makedirs(dag_dir)
-os.system('cp {0:s} {1:s}'.format(subfile, dag_dir))
+os.system('cp {0:s} {1:s}'.format(subdir+subfile, dag_dir))
 
 dag_name = 'fixsky.dag'
 dag = dag_dir + dag_name
