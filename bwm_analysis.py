@@ -64,7 +64,8 @@ parser.add_argument('-N', '--Nsamp', type=int,
 
 args = parser.parse_args()
 
-if args.costh and args.phi:
+
+if args.costh is not None and args.phi is not None:
     if args.costh > 1 or args.costh < -1:
         raise ValueError("costheta must be in range [-1, 1]")
     if args.phi > 2*np.pi or args.phi < 0:
