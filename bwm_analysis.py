@@ -45,6 +45,16 @@ parser.add_argument('--phi', type=float,
                     action='store',
                     help="sky position: phi")
 
+parser.add_argument('--tmin', type=float,
+                    dest='tmin', default=None,
+                    action='store',
+                    help="min search time (MJD)")
+
+parser.add_argument('--tmax', type=float,
+                    dest='tmax', default=None,
+                    action='store',
+                    help="max search time (MJD)")
+
 parser.add_argument('-u', '--upper-limit',
                     dest='UL', default=False,
                     action='store_true',
@@ -104,9 +114,25 @@ logmaxA = -11
 
 tmin = np.min([p.toas.min() for p in psrs]) / 86400
 tmax = np.max([p.toas.max() for p in psrs]) / 86400
-tclip = (tmax - tmin) * 0.05
-t0min = tmin + tclip
-t0max = tmax - tclip
+
+if args.tmin is not None and args.tmax is not None:
+    if args.tmin<tmin:
+        err = "tmin ({:.1f}) BEFORE first TOA ({:.1f})".format(args.tmin, tmin)
+        raise RuntimeError(err)
+    elif args.tmax>tmax:
+        err = "tmax ({:.1f}) AFTER last TOA ({:.1f})".format(args.tmax, tmax)
+        raise RuntimeError(err)
+    elif args.tmin>args.tmax:
+        err = "tmin ({:.1f}) BEFORE last tmax ({:.1f})".format(args.tmin, args.tmax)
+        raise RuntimeError(err)
+    else:
+        t0min = args.tmin
+        t0max = args.tmax
+else:
+    tclip = (tmax - tmin) * 0.05
+    t0min = tmin + tclip*2  # clip first 10%
+    t0max = tmax - tclip    # last 5%
+
 
 pta = models.model_bwm(psrs,
                        upper_limit=args.UL, bayesephem=args.BE,
