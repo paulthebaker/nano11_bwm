@@ -142,7 +142,7 @@ pta = models.model_bwm(psrs,
 pta.set_default_params(setpars)
 
 
-outfile = args.outdir + 'params.txt'
+outfile = args.outdir + '/params.txt'
 with open(outfile, 'w') as f:
     for pname in pta.param_names:
         f.write(pname+'\n')
