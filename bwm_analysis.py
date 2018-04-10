@@ -156,7 +156,10 @@ x0 = np.hstack(p.sample() for p in pta.params)
 ndim = len(x0)
 
 # initial jump covariance matrix
-cov = np.diag(np.ones(ndim) * 0.1**2)
+try:
+    cov = np.load(outdir+'/cov.npy')
+except:
+    cov = np.diag(np.ones(ndim) * 0.1**2)
 
 # parameter groupings
 groups = get_parameter_groups(pta)
