@@ -178,8 +178,11 @@ jp = JumpProposal(pta)
 sampler.addProposalToCycle(jp.draw_from_prior, 15)
 sampler.addProposalToCycle(jp.draw_from_bwm_prior, 15)
 
-draw_bwm_loguni = jp.build_log_uni_draw('log10_A_bwm', logminA, logmaxA)
-sampler.addProposalToCycle(draw_bwm_loguni, 20)
+if args.BE:
+    sampler.addProposalToCycle(jp.draw_from_ephem_prior, 15)        
+if args.UL:
+    draw_bwm_loguni = jp.build_log_uni_draw('bwm_log10_A', logminA, logmaxA)
+    sampler.addProposalToCycle(draw_bwm_loguni, 15)
 
 
 # SAMPLE!!
