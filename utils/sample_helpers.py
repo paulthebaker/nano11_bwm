@@ -146,10 +146,6 @@ class JumpProposal(object):
             idxs.append(self.pnames.index(pn))
         
         lud = LogUniDraw(idxs, logmin, logmax)
-        #namestr = 'logunidraw'
-        #for ii in idxs:
-        #    namestr += '_{}'.format(ii)
-        #lud.__name__ = namestr
 
         return lud
 
