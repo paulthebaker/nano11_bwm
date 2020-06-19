@@ -762,6 +762,91 @@ def model_bwm(psrs,
     # timing model
     s += gp_signals.TimingModel(use_svd=True)
 
+    # set up PTA
+    pta = signal_base.PTA([s(psr) for psr in psrs])
+
+    return pta
+
+
+def model_gwb_bwm(psrs,
+              psd='powerlaw', gamma_common=None, orf=None,
+              Tmin_bwm=None, Tmax_bwm=None,
+              skyloc=None, logmin=-18, logmax=-11,
+              upper_limit=False, bayesephem=False):
+    """
+    Reads in list of enterprise Pulsar instance and returns a PTA
+    instantiated with both a GWB and a GW BWM model:
+    per pulsar:
+        1. fixed EFAC per backend/receiver system
+        2. fixed EQUAD per backend/receiver system
+        3. fixed ECORR per backend/receiver system
+        4. Red noise modeled as a power-law with 30 sampling frequencies
+        5. Linear timing model.
+    global:
+        1. Common red noise modeled with user defined PSD with
+        30 sampling frequencies. Available PSDs are
+        ['powerlaw', 'turnover']
+        2. Deterministic GW burst with memory signal.
+        3. Optional physical ephemeris modeling.
+    :param psd:
+        PSD to use for common red noise signal. Available options
+        are ['powerlaw', 'turnover']. 'powerlaw' is default
+        value.
+    :param gamma_common:
+        Fixed common red process spectral index value. By default we
+        vary the spectral index over the range [0, 7].
+    :param orf:
+        String representing which overlap reduction function to use.
+        By default we do not use any spatial correlations. Permitted
+        values are ['hd', 'dipole', 'monopole'].
+    :param Tmin_bwm:
+        Min time to search for BWM (MJD). If omitted, uses first TOA.
+    :param Tmax_bwm:
+        Max time to search for BWM (MJD). If omitted, uses last TOA.
+    :param skyloc:
+        Fixed sky location of BWM signal search as [cos(theta), phi].
+        Search over sky location if ``None`` given.
+    :param logmin:
+        log of minimum BWM amplitude for prior (log10)
+    :param logmax:
+        log of maximum BWM amplitude for prior (log10)
+    :param upper_limit:
+        Perform upper limit on common red noise amplitude. By default
+        this is set to False. Note that when perfoming upper limits it
+        is recommended that the spectral index also be fixed to a specific
+        value.
+    :param bayesephem:
+        Include BayesEphem model. Set to False by default
+    """
+
+    amp_prior = 'uniform' if upper_limit else 'log-uniform'
+
+    # find the maximum time span to set GW frequency sampling
+    tmin = np.min([p.toas.min() for p in psrs])
+    tmax = np.max([p.toas.max() for p in psrs])
+    Tspan = tmax - tmin
+
+    if Tmin_bwm == None:
+        Tmin_bwm = tmin/const.day
+    if Tmax_bwm == None:
+        Tmax_bwm = tmax/const.day
+
+    # white noise
+    s = white_noise_block(vary=False)
+
+    # red noise
+    s += red_noise_block(prior=amp_prior, Tspan=Tspan)
+
+    # GW BWM signal block
+    s += bwm_block(Tmin_bwm, Tmax_bwm, amp_prior=amp_prior,
+                   skyloc=skyloc, logmin=logmin, logmax=logmax,
+                   name='bwm')
+
+    # common red noise block
+    s += common_red_noise_block(psd=psd, prior=amp_prior, Tspan=Tspan,
+                                gamma_val=gamma_common, name='gwb',
+                                orf=orf)
+
     # DM variations model
     if dmgp:
         s += dm_noise_block(gp_kernel='diag', psd='powerlaw',

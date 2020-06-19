@@ -7,9 +7,9 @@ import healpy as hp
 nside = 8
 npix = hp.nside2npix(nside)
 
-EPHs = ['DE436']
+EPHs = ['DE421', 'DE436']
 
-subdir = 'condor_sub/'
+subdr = 'condor_sub/'
 subfile = 'bwm_fixsky.sub'
 
 dag_dir = '/home/pbaker/nanograv/bwm/fixsky/'
@@ -29,10 +29,10 @@ with open(dag_dir + dag_name, 'w') as f:
 
     for ephem in EPHs:
         for loc in range(npix):
-            theta, phi = hp.pix2ang(nside, loc)
+            theta, phi = hp.pix2ang(nside,ii)
             costh = np.cos(theta)
 
-            outdir = dag_dir + "{0:s}/{1:03d}/".format('latetime_BE', loc)
+            outdir = dag_dir + "{0:s}/{1:03d}/".format(ephem, loc)
             if not os.path.exists(outdir):
                 os.makedirs(outdir)
             job_ID = random.getrandbits(128)

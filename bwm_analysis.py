@@ -78,19 +78,28 @@ parser.add_argument('-N', '--Nsamp', type=int,
                     action='store',
                     help="number of samples to collect (before thinning)")
 
+<<<<<<< HEAD
 parser.add_argument('--Nmax', type=int,
                     dest='Nmax', default=int(1.0e+05),
                     action='store',
                     help="Maximum number of thinned samples when resuming")
 
+=======
+>>>>>>> a45680d6433d50440e83324b3c271e620adbfe71
 parser.add_argument('--write-hot',
                     dest='write_hot', default=False,
                     action='store_true',
                     help="write hot PT chains")
 
+<<<<<<< HEAD
 
 args = parser.parse_args()
 
+=======
+args = parser.parse_args()
+
+
+>>>>>>> a45680d6433d50440e83324b3c271e620adbfe71
 if args.costh is not None and args.phi is not None:
     if args.costh > 1 or args.costh < -1:
         raise ValueError("costheta must be in range [-1, 1]")
@@ -112,6 +121,12 @@ try:
 except:
     # Python 2.7 ... harumph!
     subprocess.call('mkdir -p ' + args.outdir, shell=True)
+
+chainfile = outdir + '/chain_1.txt'
+thin = 10  # default PTMCMC thinning
+if os.path.isfile(chainfile)
+    Ndone = model_utils.count_lines(chainfile)
+    args.N = int((args.N - thin*Ndone) + Ndone)
 
 # read in data pickles
 with open(args.datafile, "rb") as f:
@@ -174,7 +189,10 @@ x0 = np.hstack(p.sample() for p in pta.params)
 ndim = len(x0)
 
 # initial jump covariance matrix
-cov = np.diag(np.ones(ndim) * 0.1**2)
+try:
+    cov = np.load(outdir+'/cov.npy')
+except:
+    cov = np.diag(np.ones(ndim) * 0.1**2)
 
 # parameter groupings
 groups = model_utils.get_parameter_groups(pta)
@@ -183,6 +201,7 @@ sampler = ptmcmc(ndim, pta.get_lnlikelihood, pta.get_lnprior,
                  cov, groups=groups, outDir=args.outdir, resume=True)
 
 # add prior draws to proposal cycle
+<<<<<<< HEAD
 jp = model_utils.JumpProposal(pta)
 sampler.addProposalToCycle(jp.draw_from_prior, 5)
 sampler.addProposalToCycle(jp.draw_from_bwm_prior, 10)
@@ -194,9 +213,24 @@ if args.DMGP:
 #if args.UL:
 #    draw_bwm_loguni = build_log_uni_draw('bwm_log10_A', logminA, logmaxA)
 #    sampler.addProposalToCycle(draw_bwm_loguni, 10)
+=======
+jp = JumpProposal(pta)
+sampler.addProposalToCycle(jp.draw_from_prior, 15)
+sampler.addProposalToCycle(jp.draw_from_bwm_prior, 15)
+
+if args.BE:
+    sampler.addProposalToCycle(jp.draw_from_ephem_prior, 15)        
+if args.UL:
+    draw_bwm_loguni = jp.build_log_uni_draw('bwm_log10_A', logminA, logmaxA)
+    sampler.addProposalToCycle(draw_bwm_loguni, 15)
+>>>>>>> a45680d6433d50440e83324b3c271e620adbfe71
 
 
 # SAMPLE!!
 sampler.sample(x0, args.N,
+<<<<<<< HEAD
                SCAMweight=30, AMweight=20, DEweight=50,
+=======
+               SCAMweight=30, AMweight=15, DEweight=50,
+>>>>>>> a45680d6433d50440e83324b3c271e620adbfe71
                writeHotChains=args.write_hot)
