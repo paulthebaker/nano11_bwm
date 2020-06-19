@@ -1,0 +1,23 @@
+universe = vanilla
+request_cpus = 2
+request_memory = 4096
+environment= "MKL_NUM_THREADS=2"
+accounting_group = cgca.nanograv
+getenv=True
+executable = /usr/bin/mpirun
+
+output = $(outdir)/enterprise.out
+error = $(outdir)/enterprise.err
+arguments = "-np 1 python /home/pbaker/nanograv/nano11_bwm/bwm_fixsrc.py \
+  --costheta $(costh) \
+  --phi $(phi) \
+  --psi $(psi) \
+  --t0 $(t0) \
+  --outdir $(outdir) \
+  --datafile $(datafile) \
+  --RN-distr /home/pbaker/nanograv/data/nano11_RNdistr.pkl \
+  --jup-kde /home/pbaker/nanograv/data/nano11_jup_kde.pkl \
+  --upper-limit $(BE) \
+  --Nsamp 500 --thin 100"
+
+queue

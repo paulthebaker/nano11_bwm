@@ -1,0 +1,20 @@
+universe = vanilla
+request_cpus = 32
+request_memory = 32G
+environment = "MKL_NUM_THREADS=2"
+accounting_group = cgca.nanograv
+getenv = True
+executable = /usr/bin/mpirun
+priority = 25
+
+output = /home/pbaker/nanograv/bwm/allsky/$(ephem)$(BE)/detection/bwm.out
+error = /home/pbaker/nanograv/bwm/allsky/$(ephem)$(BE)/detection/bwm.err
+arguments = "-np 16 python /home/pbaker/nanograv/nano11_bwm/bwm_analysis.py \
+  --ephem $(ephem) \
+  --outdir /home/pbaker/nanograv/bwm/allsky/$(ephem)$(BE)/detection/ \
+  --datadir /home/pbaker/nanograv/data/ \
+  $(bayesephem) \
+  --write-hot \
+  -N $(N) --Nmax 300000"
+
+queue

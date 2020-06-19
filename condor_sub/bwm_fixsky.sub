@@ -1,19 +1,21 @@
 universe = vanilla
-request_cpus = 4
+request_cpus = 2
 request_memory = 4096
-environment= "MKL_NUM_THREADS=4"
+environment= "MKL_NUM_THREADS=2"
 accounting_group = cgca.nanograv
 getenv=True
 executable = /usr/bin/mpirun
 
-output = /home/pbaker/nanograv/bwm/fixsky/$(ephem)/$(loc)/bwm.out
-error = /home/pbaker/nanograv/bwm/fixsky/$(ephem)/$(loc)/bwm.err
+output = /home/pbaker/nanograv/bwm/fixsky/latetime_BE/$(loc)/bwm.out
+error = /home/pbaker/nanograv/bwm/fixsky/latetime_BE/$(loc)/bwm.err
 arguments = "-np 1 python /home/pbaker/nanograv/nano11_bwm/bwm_analysis.py \
   --ephem $(ephem) \
   --costheta $(costh) \
   --phi $(phi) \
-  --outdir /home/pbaker/nanograv/bwm/fixsky/$(ephem)/$(loc) \
+  --outdir /home/pbaker/nanograv/bwm/fixsky/latetime_BE/$(loc) \
   --datadir /home/pbaker/nanograv/data/ \
-  -N 1500000"
+  --tmin 56000 --tmax 57000 \
+  --bayes-ephem --upper-limit \
+  -N 500000"
 
 queue

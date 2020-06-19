@@ -1,0 +1,20 @@
+universe = vanilla
+request_cpus = 4
+request_memory = 4096
+environment= "MKL_NUM_THREADS=4"
+accounting_group = cgca.nanograv
+getenv=True
+executable = /usr/bin/mpirun
+
+output = $(outdir)/enterprise.out
+error = $(outdir)/enterprise.err
+
+arguments = "-np 1 python /home/pbaker/nanograv/nano11_bwm/bwm_analysis.py \
+  --datafile $(datafile) \
+  --noisefile $(noisefile) \
+  $(tmin) $(tmax) \
+  --outdir $(outdir) \
+  --upper-limit $(bayesephem) $(dmgp) \
+  -N $(N)"
+
+queue

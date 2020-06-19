@@ -6,14 +6,17 @@ accounting_group = cgca.nanograv
 getenv=True
 executable = /usr/bin/mpirun
 
-output = /home/pbaker/nanograv/bwm/sngl/$(psr)/$(ephem)/bwm.out
-error = /home/pbaker/nanograv/bwm/sngl/$(psr)/$(ephem)/bwm.err
-arguments = "-np 1 python /home/pbaker/nanograv/nano11_bwm/bwm_sngl_psr.py \
+output = $(outdir)/enterprise.out
+error = $(outdir)/enterprise.err
+
+arguments = "-np 1 python /home/pbaker/nanograv/nano11_bwm/bwm_snglpsr.py \
   --psr $(psr) \
   --ephem $(ephem) \
-  --outdir /home/pbaker/nanograv/bwm/sngl/$(psr)/$(ephem)/ \
+  --outdir $(outdir) \
   --datadir /home/pbaker/nanograv/data/nano11/ \
   --noisefile /home/pbaker/nanograv/data/nano11_setpars.pkl \
+  $(tmin) $(tmax) \
+  $(UL) \
   -N 5000000"
 
 queue
