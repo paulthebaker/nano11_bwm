@@ -43,6 +43,16 @@ parser.add_argument('-y', '--slice-yr',
                     help="length of time slice in years. If slice is\
                           longer than dataset all time is used.")
 
+parser.add_argument('--costheta', type=float,
+                    dest='costh', default=None,
+                    action='store',
+                    help="sky position: cos(theta)")
+
+parser.add_argument('--phi', type=float,
+                    dest='phi', default=None,
+                    action='store',
+                    help="sky position: phi")
+
 parser.add_argument('-u', '--upper-limit',
                     dest='UL', default=False,
                     action='store_true',
@@ -62,6 +72,22 @@ parser.add_argument('-N', '--Nsamp', type=int,
 
 args = parser.parse_args()
 
+if args.costh is not None and args.phi is not None:
+    if args.costh > 1 or args.costh < -1:
+        raise ValueError("costheta must be in range [-1, 1]")
+    if args.phi > 2*np.pi or args.phi < 0:
+        raise ValueError("phi must be in range [0, 2*pi]")
+
+    skyloc = [args.costh, args.phi]
+
+elif not args.costh and not args.phi:
+    skyloc = None
+
+else:
+    err = "for fixed sky location must provide BOTH phi and costheta"
+    raise RuntimeError(err)
+
+
 try:
     subprocess.run(['mkdir', '-p', args.outdir])
 except:
@@ -77,11 +103,11 @@ filename = args.datadir + 'nano11_setpars.pkl'
 with open(filename, "rb") as f:
     setpars = pickle.load(f)
 
-# clip 2% of FULL data set at each end
+# clip 5% of FULL data set at each end
 # use same clip time for all slices
 tmin = np.min([p.toas.min() for p in psrs]) / const.day
 tmax = np.max([p.toas.max() for p in psrs]) / const.day
-tclip = (tmax - tmin) * 0.02
+tclip = (tmax - tmin) * 0.05
 
 psrs = models.which_psrs(psrs, args.yrs, 3)  # select pulsars
 
@@ -100,11 +126,11 @@ t0max = tmax - tclip
 pta = models.model_bwm(psrs,
                        upper_limit=args.UL, bayesephem=args.BE,
                        logmin=logminA, logmax=logmaxA,
-                       Tmin_bwm=t0min, Tmax_bwm=t0max)
+                       Tmin_bwm=t0min, Tmax_bwm=t0max,
+                       skyloc=skyloc)
 pta.set_default_params(setpars)
 
-
-outfile = args.outdir + 'params.txt'
+outfile = args.outdir + '/params.txt'
 with open(outfile, 'w') as f:
     for pname in pta.param_names:
         f.write(pname+'\n')
@@ -131,7 +157,7 @@ jp = JumpProposal(pta)
 sampler.addProposalToCycle(jp.draw_from_prior, 15)
 sampler.addProposalToCycle(jp.draw_from_bwm_prior, 15)
 
-draw_bwm_loguni = jp.build_log_uni_draw('log10_A_bwm', logminA, logmaxA)
+draw_bwm_loguni = jp.build_log_uni_draw('bwm_log10_A', logminA, logmaxA)
 sampler.addProposalToCycle(draw_bwm_loguni, 20)
 
 

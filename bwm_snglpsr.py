@@ -13,6 +13,8 @@ from utils import models
 from utils.sample_helpers import JumpProposal, get_parameter_groups
 
 from enterprise.pulsar import Pulsar
+from enterprise.signals import utils
+from enterprise import constants as const
 from PTMCMCSampler.PTMCMCSampler import PTSampler as ptmcmc
 
 
@@ -44,6 +46,16 @@ parser.add_argument('-o', '--outdir',
                     dest='outdir', default='~/nanograv/bwm/{psr:s}/',
                     action='store',
                     help="location to write output")
+
+parser.add_argument('--tmin', type=float,
+                    dest='tmin', default=None,
+                    action='store',
+                    help="min search time (MJD)")
+
+parser.add_argument('--tmax', type=float,
+                    dest='tmax', default=None,
+                    action='store',
+                    help="max search time (MJD)")
 
 parser.add_argument('-u', '--upper-limit',
                     dest='UL', default=False,
@@ -81,20 +93,39 @@ with open(args.noisefile, "rb") as f:
 logminA = -18
 logmaxA = -9
 
-tmin = psr.toas.min() / 86400
-tmax = psr.toas.max() / 86400
-tclip = (tmax - tmin) * 0.05
-t0min = tmin + tclip
-t0max = tmax - tclip
+tmin = psr.toas.min() / const.day
+tmax = psr.toas.max() / const.day
 
-pta = models.model_bwm([psr],
+if args.tmin is not None and args.tmax is not None:
+    if args.tmin<tmin:
+        err = "tmin ({:.1f}) BEFORE first TOA ({:.1f})".format(args.tmin, tmin)
+        raise RuntimeError(err)
+    elif args.tmax>tmax:
+        err = "tmax ({:.1f}) AFTER last TOA ({:.1f})".format(args.tmax, tmax)
+        raise RuntimeError(err)
+    elif args.tmin>args.tmax:
+        err = "tmin ({:.1f}) BEFORE last tmax ({:.1f})".format(args.tmin, args.tmax)
+        raise RuntimeError(err)
+    else:
+        t0min = args.tmin
+        t0max = args.tmax
+else:
+    U,_ = utils.create_quantization_matrix(psr.toas)
+    eps = 9  # clip first and last N observing epochs
+    t0min = np.floor(max(U[:,eps] * psr.toas/const.day))
+    t0max = np.ceil(max(U[:,-eps] * psr.toas/const.day))
+    #tclip = (tmax - tmin) * 0.05
+    #t0min = tmin + tclip*2  # clip first 10%
+    #t0max = tmax - tclip    # clip last 5%
+
+pta = models.model_bwm([psr], sngl_psr=True,
                        upper_limit=args.UL, bayesephem=False,
                        logmin=logminA, logmax=logmaxA,
                        Tmin_bwm=t0min, Tmax_bwm=t0max) 
 pta.set_default_params(setpars)
 
 
-outfile = args.outdir + 'params.txt'
+outfile = args.outdir + '/params.txt'
 with open(outfile, 'w') as f:
     for pname in pta.param_names:
         f.write(pname+'\n')
@@ -118,11 +149,11 @@ sampler = ptmcmc(ndim, pta.get_lnlikelihood, pta.get_lnprior,
 
 # add prior draws to proposal cycle
 jp = JumpProposal(pta)
-sampler.addProposalToCycle(jp.draw_from_prior, 15)
-sampler.addProposalToCycle(jp.draw_from_bwm_prior, 15)
+sampler.addProposalToCycle(jp.draw_from_prior, 5)
+sampler.addProposalToCycle(jp.draw_from_bwm_prior, 10)
 
-draw_bwm_loguni = jp.build_log_uni_draw('log10_A_bwm', logminA, logmaxA)
-sampler.addProposalToCycle(draw_bwm_loguni, 20)
+draw_bwm_loguni = jp.build_log_uni_draw('bwm_log10_A', logminA, logmaxA)
+sampler.addProposalToCycle(draw_bwm_loguni, 10)
 
 
 # SAMPLE!!
